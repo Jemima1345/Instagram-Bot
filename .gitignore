@@ -1,0 +1,5 @@
+#The following untracked files will not be pushed to github
+
+__pycache__
+config.ini
+chromedriver
