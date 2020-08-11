@@ -1,5 +1,4 @@
 from selenium import webdriver
-#from selenium.webdriver.chrome.options import Options
 import time
 import os
 from configparser import ConfigParser
@@ -10,9 +9,6 @@ class InstagramBot:
         """
         Creates an instance of the InstagramBot class  
         """
-        #chrome_options = Options()
-        #chrome_options.add_argument("--headless")
-        #chrome_options.add_argument('--no-sandbox')
         
         config = ConfigParser()
         config_file = 'config.ini'
@@ -50,13 +46,6 @@ class InstagramBot:
         not_now_btn2.click()
         time.sleep(1)
         
-        #The following also works
-        #not_now_btn1 = self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/div/div/div/button')
-        #not_now_btn1.click()
-        #not_now_btn2 = self.driver.find_element_by_xpath('/html/body/div[4]/div/div/div/div[3]/button[2]')
-        #not_now_btn2.click()
-        #time.sleep(1)
-        
         
     def nav_user(self, user):
         """
@@ -70,13 +59,10 @@ class InstagramBot:
         """
         Follows a user when on their page
         """
-        #follow_btn = self.driver.find_element_by_xpath('//*[contains(@class,"_6VtSN")')
-        #follow_btn = self.driver.find_element_by_xpath("//button[contains(text(),'Follow')")
-        
-        #follow_btn = self.driver.find_element_by_xpath('//*[@class="_5f5mN       jIbKX  _6VtSN     yZn4P   "]') #also works
-        follow_btn = self.driver.find_element_by_xpath('//*[text() = "Follow"]')
+        #follow_btn = self.driver.find_element_by_xpath('//*[text() = "Follow"]')
+        follow_btn = self.find_button("Follow")
         follow_btn.click()
-        time.sleep(2)
+        time.sleep(1)
 
     
     def open_users_followers(self): #, user):
@@ -87,6 +73,15 @@ class InstagramBot:
         followers_btn = self.driver.find_element_by_partial_link_text("followers")
         followers_btn.click()
         time.sleep(2)
+        
+    
+    def find_button(self, button):
+        """
+        Finds buttons for following and unfollowing
+        """
+        #xpath('//*[text() = "Follow"]')
+        btn = self.driver.find_element_by_xpath('//*[text() = "{}"]'.format(button))
+        return btn
 
         
 my_bot = InstagramBot()
@@ -96,7 +91,7 @@ account = "guitarcenter"
 my_bot.nav_user(account)
 
 #TODO: if it finds the follow button, follow user
-#my_bot.follow_user()
+my_bot.follow_user()
 
 
 my_bot.open_users_followers()
