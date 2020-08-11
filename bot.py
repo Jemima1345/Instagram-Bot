@@ -65,6 +65,18 @@ class InstagramBot:
         time.sleep(1)
 
     
+    def unfollow_user(self):
+        """
+        Unfollows a user when on their page
+        """
+        #unfollow_btn = self.find_button("Following")
+        unfollow_btn = self.driver.find_element_by_xpath('//*[@aria-label = "Following"]')
+        unfollow_btn.click()
+        confirm_unfollow_btn = self.find_button("Unfollow")
+        confirm_unfollow_btn.click()
+        time.sleep(1)
+        
+        
     def open_users_followers(self): #, user):
         """
         Opens a user's follower list when the user's page is already open
@@ -77,9 +89,9 @@ class InstagramBot:
     
     def find_button(self, button):
         """
-        Finds buttons for following and unfollowing
+        Finds buttons (does not work for unfollow button when on user's page)
         """
-        #xpath('//*[text() = "Follow"]')
+        
         btn = self.driver.find_element_by_xpath('//*[text() = "{}"]'.format(button))
         return btn
 
@@ -90,9 +102,12 @@ my_bot.log_in()
 account = "guitarcenter"
 my_bot.nav_user(account)
 
-#TODO: if it finds the follow button, follow user
-my_bot.follow_user()
+my_bot.unfollow_user()
 
 
-my_bot.open_users_followers()
-my_bot.follow_user()
+##TODO: if it finds the follow button, follow user
+#my_bot.follow_user()
+
+
+#my_bot.open_users_followers()
+#my_bot.follow_user()
