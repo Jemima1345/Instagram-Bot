@@ -7,8 +7,11 @@ from configparser import ConfigParser
 class InstagramBot:
     def __init__(self):       
         """
-        Creates an instance of the InstagramBot class  
+        Creates an instance of the InstagramBot class. Initializes an empty list to store people it has followed  
         """
+        
+        self.has_fllwd = self.get_has_fllwd_list()
+        print(self.has_fllwd)
         
         config = ConfigParser()
         config_file = 'config.ini'
@@ -41,6 +44,7 @@ class InstagramBot:
         
         not_now_btn1 = self.driver.find_element_by_xpath('//*[text() = "Not Now"]')
         not_now_btn1.click()
+        time.sleep(2)
         #must redefine btn to avoid error
         not_now_btn2 = self.driver.find_element_by_xpath('//*[text() = "Not Now"]')
         not_now_btn2.click()
@@ -57,19 +61,23 @@ class InstagramBot:
         
     def follow_user(self):
         """
-        Follows a user when on their page
+        Follows a user when on their page and stores them in the list of people it has followed
         """
         #follow_btn = self.driver.find_element_by_xpath('//*[text() = "Follow"]')
         follow_btn = self.find_button("Follow")
         follow_btn.click()
         time.sleep(1)
+        
+        username = self.driver.find_element_by_xpath('//*[@class = "FPmhX notranslate  _0imsa "]').get_attribute('title')        
+        self.has_fllwd.append(username)
+        print(self.has_fllwd)      
 
     
     def unfollow_user(self):
         """
         Unfollows a user when on their page
         """
-        #unfollow_btn = self.find_button("Following")
+        
         unfollow_btn = self.driver.find_element_by_xpath('//*[@aria-label = "Following"]')
         unfollow_btn.click()
         confirm_unfollow_btn = self.find_button("Unfollow")
@@ -89,25 +97,46 @@ class InstagramBot:
     
     def find_button(self, button):
         """
-        Finds buttons (does not work for unfollow button when on user's page)
+        Finds buttons by text. Does not work for unfollow button when on the user's page
         """
         
         btn = self.driver.find_element_by_xpath('//*[text() = "{}"]'.format(button))
         return btn
-
+    
+    
+    def get_has_fllwd_list(self):
+        with open('list.txt', 'r') as file:
+            has_fllwd_string = file.read()
+            has_fllwd_list = has_fllwd_string.split("\n")
+            return has_fllwd_list
         
+        
+    def save_has_fllwd_list(self):
+        with open('list.txt', 'w') as file:
+            has_fllwd_string = "\n".join(self.has_fllwd)
+            file.write(has_fllwd_string)
+
+    
 my_bot = InstagramBot()
 my_bot.log_in()
 
 account = "guitarcenter"
 my_bot.nav_user(account)
 
-my_bot.unfollow_user()
+my_bot.open_users_followers()
 
+my_bot.follow_user()
+
+##TODO: store a user who is followed from their page in the has_fllwd list
+##TODO: prevent has_fllwd list from being cleared on each run
+
+
+#for user in range(0,3):
+ #   my_bot.follow_user()
 
 ##TODO: if it finds the follow button, follow user
 #my_bot.follow_user()
-
-
-#my_bot.open_users_followers()
+#my_bot.unfollow_user()
 #my_bot.follow_user()
+
+my_bot.save_has_fllwd_list()
