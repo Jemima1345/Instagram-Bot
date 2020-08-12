@@ -4,6 +4,7 @@ import os
 from configparser import ConfigParser
 
 
+##TODO: 
 ##TODO: store a user who is followed from their page in the has_fllwd list
 
 
@@ -82,7 +83,23 @@ class InstagramBot:
         confirm_unfollow_btn.click()
         time.sleep(1)
         
+    
+    def open_users_list(self, users_list):
+        """
+        Opens either a user's follower or following list when the user's page is already open
         
+        Args:
+        users_list:str: Which list to open (followers/ following)
+        """  
+        
+        if users_list == "followers" or users_list == "following":
+            list_btn = self.driver.find_element_by_partial_link_text("{}".format(users_list))
+            list_btn.click()
+            time.sleep(2) 
+        else:
+            print('Not a valid list')
+        
+    
     def open_users_followers(self): #, user):
         """
         Opens a user's follower list when the user's page is already open
@@ -92,7 +109,16 @@ class InstagramBot:
         followers_btn.click()
         time.sleep(2)
         
-            
+    
+    def open_users_following(self):
+        """
+        Opens a user's following list when the user's page is already open
+        """
+        following_btn = self.driver.find_element_by_partial_link_text("following")
+        following_btn.click()
+        time.sleep(2)        
+        
+        
     def follow_multiple_users(self, follow_num):
         """
         Follows several users out of a list of users (if it has never followed them before) 
@@ -126,6 +152,9 @@ class InstagramBot:
     
     
     def get_has_fllwd_list(self):
+        """
+        Reads in the list of people it has followed
+        """
         with open('list.txt', 'r') as file:
             has_fllwd_string = file.read()
             has_fllwd_list = has_fllwd_string.split("\n")
@@ -133,22 +162,36 @@ class InstagramBot:
         
         
     def save_has_fllwd_list(self):
+        """
+        Saves the updated list of people it has followed into a txt file
+        """
         with open('list.txt', 'w') as file:
             has_fllwd_string = "\n".join(self.has_fllwd)
             file.write(has_fllwd_string)
-
+            
+    
+    def scroll_down(self):
+        """
+        Scrolls down to the bottom of page
+        """
+        
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        
+        
     
 my_bot = InstagramBot()
 my_bot.log_in()
 
-account = "guitarcenter"
-my_bot.nav_user(account)
-my_bot.open_users_followers()
+#account = "guitarcenter"
+#my_bot.nav_user(account)
+#my_bot.open_users_list('followers')
+#my_bot.follow_multiple_users(3)
 
-my_bot.follow_multiple_users(3)
+my_bot.nav_user('guitar.stuff239')
+my_bot.open_users_list('following')
+my_bot.scroll_down()
 
-#my_bot.follow_multiple_users(1)
-#for follow_num in range(0,3):
-    #my_bot.follow_multiple_users(follow_num+1)
+#my_bot.nav_user('ana.hinojosa.12')
+
 
 my_bot.save_has_fllwd_list()
