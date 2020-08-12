@@ -4,14 +4,16 @@ import os
 from configparser import ConfigParser
 
 
+##TODO: store a user who is followed from their page in the has_fllwd list
+
+
 class InstagramBot:
     def __init__(self):       
         """
-        Creates an instance of the InstagramBot class. Initializes an empty list to store people it has followed  
+        Creates an instance of the InstagramBot class. Reads in the list of people it has followed 
         """
         
         self.has_fllwd = self.get_has_fllwd_list()
-        print(self.has_fllwd)
         
         config = ConfigParser()
         config_file = 'config.ini'
@@ -57,22 +59,18 @@ class InstagramBot:
         """
         self.driver.get(self.user_url.format(user))
         time.sleep(1)
-        
-        
+
+
     def follow_user(self):
         """
-        Follows a user when on their page and stores them in the list of people it has followed
+        Follows a user when on their page
         """
         #follow_btn = self.driver.find_element_by_xpath('//*[text() = "Follow"]')
         follow_btn = self.find_button("Follow")
         follow_btn.click()
         time.sleep(1)
         
-        username = self.driver.find_element_by_xpath('//*[@class = "FPmhX notranslate  _0imsa "]').get_attribute('title')        
-        self.has_fllwd.append(username)
-        print(self.has_fllwd)      
-
-    
+        
     def unfollow_user(self):
         """
         Unfollows a user when on their page
@@ -94,6 +92,29 @@ class InstagramBot:
         followers_btn.click()
         time.sleep(2)
         
+            
+    def follow_multiple_users(self, follow_num):
+        """
+        Follows several users out of a list of users (if it has never followed them before) 
+        and stores them in the list of people it has followed.
+        Does not work for following a user when on their page (name_id is different)
+        
+        Args:
+        follow_num:int: Number of users to follow
+        """
+
+        for user_num in range(0, follow_num):
+            name_id = self.driver.find_element_by_xpath('(//*[@class = "FPmhX notranslate  _0imsa "])[{}]'.format(user_num+1))
+            username = name_id.get_attribute('title')    
+            
+            if username not in self.has_fllwd: 
+                follow_btn = self.find_button("Follow")
+                follow_btn.click()
+                self.has_fllwd.append(username)
+                time.sleep(1)   
+            else:
+                print('User has been followed before')
+
     
     def find_button(self, button):
         """
@@ -122,21 +143,12 @@ my_bot.log_in()
 
 account = "guitarcenter"
 my_bot.nav_user(account)
-
 my_bot.open_users_followers()
 
-my_bot.follow_user()
+my_bot.follow_multiple_users(3)
 
-##TODO: store a user who is followed from their page in the has_fllwd list
-##TODO: prevent has_fllwd list from being cleared on each run
-
-
-#for user in range(0,3):
- #   my_bot.follow_user()
-
-##TODO: if it finds the follow button, follow user
-#my_bot.follow_user()
-#my_bot.unfollow_user()
-#my_bot.follow_user()
+#my_bot.follow_multiple_users(1)
+#for follow_num in range(0,3):
+    #my_bot.follow_multiple_users(follow_num+1)
 
 my_bot.save_has_fllwd_list()
