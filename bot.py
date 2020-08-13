@@ -4,7 +4,8 @@ import os
 from configparser import ConfigParser
 
 
-##TODO: 
+##TODO: scroll_down_list gets caught. does not keep loading and scrolling
+##TODO: infinite scroll down user's page
 ##TODO: store a user who is followed from their page in the has_fllwd list
 
 
@@ -97,41 +98,29 @@ class InstagramBot:
             list_btn.click()
             time.sleep(2) 
         else:
-            print('Not a valid list')
+            print('Not a valid user list')   
         
     
-    def open_users_followers(self): #, user):
+    def close_users_list(self):
         """
-        Opens a user's follower list when the user's page is already open
+        Closes either a user's following or follower box if it's already open
         """
-        #self.driver.get(self.users_followers_url.format(user))
-        followers_btn = self.driver.find_element_by_partial_link_text("followers")
-        followers_btn.click()
-        time.sleep(2)
-        
+        self.driver.find_element_by_xpath('//*[@aria-label = "Close"]').click()
     
-    def open_users_following(self):
-        """
-        Opens a user's following list when the user's page is already open
-        """
-        following_btn = self.driver.find_element_by_partial_link_text("following")
-        following_btn.click()
-        time.sleep(2)        
-        
-        
+    
     def follow_multiple_users(self, follow_num):
         """
         Follows several users out of a list of users (if it has never followed them before) 
         and stores them in the list of people it has followed.
-        Does not work for following a user when on their page (name_id is different)
+        Does not work for following a user when on their page (user_id is different)
         
         Args:
         follow_num:int: Number of users to follow
         """
 
         for user_num in range(0, follow_num):
-            name_id = self.driver.find_element_by_xpath('(//*[@class = "FPmhX notranslate  _0imsa "])[{}]'.format(user_num+1))
-            username = name_id.get_attribute('title')    
+            user_id = self.driver.find_element_by_xpath('(//*[@class = "FPmhX notranslate  _0imsa "])[{}]'.format(user_num+1))
+            username = user_id.get_attribute('title')    
             
             if username not in self.has_fllwd: 
                 follow_btn = self.find_button("Follow")
@@ -168,30 +157,79 @@ class InstagramBot:
         with open('list.txt', 'w') as file:
             has_fllwd_string = "\n".join(self.has_fllwd)
             file.write(has_fllwd_string)
-            
+        
     
-    def scroll_down(self):
+    def scroll_down_list(self):
         """
-        Scrolls down to the bottom of page
+        Scrolls to the bottom of following/ follower list
         """
+        #self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scroll_box)
+        #time.sleep(2)
         
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        scroll_pause_time = 1
+        scroll_box = self.driver.find_element_by_xpath('/html/body/div[4]/div/div/div[2]')
+        old_height = self.driver.execute_script("arguments[0].scrollTop", scroll_box)
         
+        while True:
+            new_height = self.driver.execute_script("""arguments[0].scrollTo(0, arguments[0].scrollHeight); 
+                                                       return arguments[0].scrollHeight""", scroll_box) 
+            time.sleep(scroll_pause_time)
+            if new_height == old_height: #cannot scroll anymore
+                break       
+            old_height = new_height
+
+        
+    def scroll_down_page(self):
+        """
+        Scrolls down to the bottom of a page
+        Doesn't work for scrolling down following/ follower list
+        """
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")   
+        
+    
+    def get_user_list(self):
+        """
+        Gets all the usernames of people in instagram following/ follower list and puts them in a list
+        """
+        username_list = []
+        user_id_list = self.driver.find_elements_by_xpath('//*[@class = "FPmhX notranslate  _0imsa "]')
+        for user in user_id_list:
+            username = user.get_attribute('title')
+            username_list.append(username)
+        print (username_list)
+        return username_list
+        
+    
+    def get_unfollowers(self):
+        """
+        Finds who is not following you back and puts them in a list
+        """
+        self.nav_user(self.username)
+        self.open_users_list('following')
+        self.scroll_down_list()
+        following = self.get_user_list()
+        
+        self.close_users_list()
+        
+        self.open_users_list('followers')
+        scroll_down_list()
+        followers = self.get_user_list()
         
     
 my_bot = InstagramBot()
 my_bot.log_in()
 
+my_bot.get_unfollowers()
+
 #account = "guitarcenter"
-#my_bot.nav_user(account)
+#my_bot.nav_user(my_account)
 #my_bot.open_users_list('followers')
 #my_bot.follow_multiple_users(3)
 
-my_bot.nav_user('guitar.stuff239')
-my_bot.open_users_list('following')
-my_bot.scroll_down()
+#my_bot.nav_user('art_gallery_666')
+#my_bot.open_users_list('following')
+#my_bot.scroll_down_list()
+#time.sleep(60)
 
-#my_bot.nav_user('ana.hinojosa.12')
 
-
-my_bot.save_has_fllwd_list()
+#my_bot.save_has_fllwd_list()
