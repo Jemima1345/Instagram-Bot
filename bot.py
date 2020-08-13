@@ -93,7 +93,7 @@ class InstagramBot:
         users_list:str: Which list to open (followers/ following)
         """  
         
-        if users_list == "followers" or users_list == "following":
+        if users_list == "follower" or users_list == "following":
             list_btn = self.driver.find_element_by_partial_link_text("{}".format(users_list))
             list_btn.click()
             time.sleep(2) 
@@ -204,6 +204,7 @@ class InstagramBot:
         """
         Finds who is not following you back and puts them in a list
         """
+        unfollowers = []
         self.nav_user(self.username)
         self.open_users_list('following')
         self.scroll_down_list()
@@ -211,10 +212,16 @@ class InstagramBot:
         
         self.close_users_list()
         
-        self.open_users_list('followers')
-        scroll_down_list()
+        self.open_users_list('follower')
+        self.scroll_down_list()
         followers = self.get_user_list()
         
+        for user in following:
+            if user not in followers:
+                unfollowers.append(user)
+        print(unfollowers)
+        return unfollowers
+    
     
 my_bot = InstagramBot()
 my_bot.log_in()
