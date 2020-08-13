@@ -129,8 +129,8 @@ class InstagramBot:
                 time.sleep(1)   
             else:
                 print('User has been followed before')
-
-    
+   
+        
     def find_button(self, button):
         """
         Finds buttons by text. Does not work for unfollow button when on the user's page
@@ -196,15 +196,15 @@ class InstagramBot:
         for user in user_id_list:
             username = user.get_attribute('title')
             username_list.append(username)
-        print (username_list)
+        print (len(username_list), username_list)
         return username_list
         
     
-    def get_unfollowers(self):
+    def get_not_following_back(self):
         """
         Finds who is not following you back and puts them in a list
         """
-        unfollowers = []
+        not_following_back = []
         self.nav_user(self.username)
         self.open_users_list('following')
         self.scroll_down_list()
@@ -218,15 +218,29 @@ class InstagramBot:
         
         for user in following:
             if user not in followers:
-                unfollowers.append(user)
-        print(unfollowers)
-        return unfollowers
+                not_following_back.append(user)
+        print(not_following_back)
+        return not_following_back
     
     
+    def unfollow_not_following_back(self, not_following_back, do_not_unfollow):
+        """
+        Unfollows everyone who is not following you back
+        """
+        for person in do_not_unfollow:
+            not_following_back.remove(person)
+        
+        for user in not_following_back:
+            self.nav_user(user)
+            self.unfollow_user()
+        
+        
 my_bot = InstagramBot()
 my_bot.log_in()
 
-my_bot.get_unfollowers()
+bad_people = my_bot.get_not_following_back()
+special_people = ['billy.musgrave'] #people i don't want to unfollow add 'guitarcenter', 
+my_bot.unfollow_not_following_back(bad_people, special_people)
 
 #account = "guitarcenter"
 #my_bot.nav_user(my_account)
