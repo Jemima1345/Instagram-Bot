@@ -16,7 +16,7 @@ class InstagramBot:
         Creates an instance of the InstagramBot class. Reads in the list of people it has followed 
         """
         
-        self.has_fllwd = self.get_has_fllwd_list()
+        self.bot_fllwd = self.get_has_fllwd_list()
         
         config = ConfigParser()
         config_file = 'config.ini'
@@ -125,10 +125,10 @@ class InstagramBot:
             user_id = self.driver.find_element_by_xpath('(//*[@class = "FPmhX notranslate  _0imsa "])[{}]'.format(user_num+1))
             username = user_id.get_attribute('title')    
             
-            if username not in self.has_fllwd: 
+            if username not in self.bot_fllwd: 
                 follow_btn = self.find_button("Follow")
                 follow_btn.click()
-                self.has_fllwd.append(username)
+                self.bot_fllwd.append(username)
                 time.sleep(1)   
             else:
                 print('User has been followed before')
@@ -158,7 +158,7 @@ class InstagramBot:
         Saves the updated list of people it has followed into a txt file
         """
         with open('list.txt', 'w') as file:
-            has_fllwd_string = "\n".join(self.has_fllwd)
+            has_fllwd_string = "\n".join(self.bot_fllwd)
             file.write(has_fllwd_string)
         
     
@@ -281,39 +281,45 @@ class InstagramBot:
             self.get_follow_num(follow_type)            
         
      
-    #def find_manually_followed(self):
-        #"""
-        #Finds users who were followed manually instead of through the bot and puts them in a list
-        #"""
-        #self.nav_user(self.username)
-        #self.open_users_list('following')
-        #following = self.get_users_in_list()
-        
-          
-          
-          
+    def find_manually_followed(self):
+        """
+        Finds users who were followed manually instead of through the bot and puts them in a list
+        """
+        self.nav_user(self.username)
+        self.open_users_list('following')
+        following = self.get_users_in_list()
+       
+        manually_followed = []
+        for user in following: 
+            if user not in self.bot_fllwd:
+                manually_followed.append(user)
+        return manually_followed
+    
           
 my_bot = InstagramBot()
 my_bot.log_in()
-
-#bad_people = my_bot.get_not_following_back()
-#special_people = ['guitarcenter', 'billy.musgrave'] #people I don't want to unfollow
-#my_bot.unfollow_not_following_back(bad_people, special_people)
 
 #account = "guitarcenter"
 #my_bot.nav_user(my_account)
 #my_bot.open_users_list('followers')
 #my_bot.follow_multiple_users(3)
 
-my_bot.nav_user('art_gallery_666')
-my_bot.infinite_page_scroll()
+#bad_people = my_bot.get_not_following_back()
+special_people = ['guitarcenter', 'billy.musgrave'] #people I don't want to unfollow
+special_accounts = my_bot.find_manually_followed()
+special_people.append(special_accounts)
+#my_bot.unfollow_not_following_back(bad_people, special_people)
 
+print(special_accounts)
+print(special_people)
+
+#my_bot.nav_user('art_gallery_666')
 #num = my_bot.get_follow_num('fake')
 #print(num)
 
+#my_bot.infinite_page_scroll()
 #my_bot.open_users_list('followers')
 #my_bot.infinite_list_scroll()
 #time.sleep(60)
-
 
 #my_bot.save_has_fllwd_list()
