@@ -93,12 +93,12 @@ class InstagramBot:
         users_list:str: Which list to open (followers/ following)
         """  
         
-        if users_list == "follower" or users_list == "following":
+        if users_list == "followers" or users_list == "following":
             list_btn = self.driver.find_element_by_partial_link_text("{}".format(users_list))
             list_btn.click()
             time.sleep(2) 
         else:
-            print('Not a valid user list')   
+            print('Not a valid user list. Can only open "followers" or "following" list')   
         
     
     def close_users_list(self):
@@ -166,14 +166,14 @@ class InstagramBot:
         #self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scroll_box)
         #time.sleep(2)
         
-        scroll_pause_time = 1
+        SCROLL_PAUSE_TIME = 1
         scroll_box = self.driver.find_element_by_xpath('/html/body/div[4]/div/div/div[2]')
         old_height = self.driver.execute_script("arguments[0].scrollTop", scroll_box)
         
         while True:
             new_height = self.driver.execute_script("""arguments[0].scrollTo(0, arguments[0].scrollHeight); 
                                                        return arguments[0].scrollHeight""", scroll_box) 
-            time.sleep(scroll_pause_time)
+            time.sleep(SCROLL_PAUSE_TIME)
             if new_height == old_height: #cannot scroll anymore
                 break       
             old_height = new_height
@@ -187,7 +187,7 @@ class InstagramBot:
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")   
         
     
-    def get_user_list(self):
+    def get_users_in_list(self):
         """
         Gets all the usernames of people in instagram following/ follower list and puts them in a list
         """
@@ -208,13 +208,12 @@ class InstagramBot:
         self.nav_user(self.username)
         self.open_users_list('following')
         self.scroll_down_list()
-        following = self.get_user_list()
-        
+        following = self.get_users_in_list()
         self.close_users_list()
         
-        self.open_users_list('follower')
+        self.open_users_list('followers')
         self.scroll_down_list()
-        followers = self.get_user_list()
+        followers = self.get_users_in_list()
         
         for user in following:
             if user not in followers:
@@ -233,22 +232,48 @@ class InstagramBot:
         for user in not_following_back:
             self.nav_user(user)
             self.unfollow_user()
+            
+    
+    def unfollow_everyone(self):
+        """
+        Unfollows everyone that you're following
+        TODO: This takes too long. Unfollow them directly from your following list without getting their names
+        """
+
+        following = self.get_users_in_list('following')
+        for user in following:
+            self.nav_user(user)
+            self.unfollow_user(user)
+            
+
+    def get_follower_num(self, follow):
+        """
+        Finds how many followers a user has
+        """
+        
+        followers_box = self.driver.find_element_by_partial_link_text("followers")
+        follower_num = followers_box.text #.text gives the Name of the link text
+        print(follower_num)
+        return follower_num    
         
         
 my_bot = InstagramBot()
 my_bot.log_in()
 
-bad_people = my_bot.get_not_following_back()
-special_people = ['billy.musgrave'] #people i don't want to unfollow add 'guitarcenter', 
-my_bot.unfollow_not_following_back(bad_people, special_people)
+#bad_people = my_bot.get_not_following_back()
+#special_people = ['guitarcenter', 'billy.musgrave'] #people I don't want to unfollow
+#my_bot.unfollow_not_following_back(bad_people, special_people)
 
 #account = "guitarcenter"
 #my_bot.nav_user(my_account)
 #my_bot.open_users_list('followers')
 #my_bot.follow_multiple_users(3)
 
-#my_bot.nav_user('art_gallery_666')
-#my_bot.open_users_list('following')
+my_bot.nav_user('art_gallery_666')
+num = my_bot.get_follower_num()
+#print(num)
+
+#my_bot.open_users_list('followers')
 #my_bot.scroll_down_list()
 #time.sleep(60)
 
