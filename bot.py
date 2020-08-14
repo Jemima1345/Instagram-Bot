@@ -4,7 +4,8 @@ import os
 from configparser import ConfigParser
 
 
-##TODO: scroll_down_list gets caught. does not keep loading and scrolling
+##TODO: infinite_list_scroll gets caught. does not keep loading and scrolling
+##TODO: fix get_follow_num error scenario 
 ##TODO: infinite scroll down user's page
 ##TODO: store a user who is followed from their page in the has_fllwd list
 
@@ -98,7 +99,9 @@ class InstagramBot:
             list_btn.click()
             time.sleep(2) 
         else:
-            print('Not a valid user list. Can only open "followers" or "following" list')   
+            print('Not a valid list. Can only open "followers" or "following" list')
+            users_list = input("Enter a user's list to open: ")
+            self.open_users_list(users_list)
         
     
     def close_users_list(self):
@@ -159,7 +162,7 @@ class InstagramBot:
             file.write(has_fllwd_string)
         
     
-    def scroll_down_list(self):
+    def infinite_list_scroll(self):
         """
         Scrolls to the bottom of following/ follower list
         """
@@ -168,7 +171,7 @@ class InstagramBot:
         
         SCROLL_PAUSE_TIME = 1
         scroll_box = self.driver.find_element_by_xpath('/html/body/div[4]/div/div/div[2]')
-        old_height = self.driver.execute_script("arguments[0].scrollTop", scroll_box)
+        old_height = self.driver.execute_script('arguments[0].scrollTop', scroll_box) #top of list
         
         while True:
             new_height = self.driver.execute_script("""arguments[0].scrollTo(0, arguments[0].scrollHeight); 
@@ -179,17 +182,28 @@ class InstagramBot:
             old_height = new_height
 
         
-    def scroll_down_page(self):
+    def infinite_page_scroll(self):
         """
-        Scrolls down to the bottom of a page
+        Scrolls down to the bottom of a page when the page is already open
         Doesn't work for scrolling down following/ follower list
         """
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")   
         
+        SCROLL_PAUSE_TIME = 4
+        old_ht = self.driver.execute_script('return document.body.scrollHeight;')
+        
+        while True:
+            self.driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+            time.sleep(SCROLL_PAUSE_TIME)
+            new_ht = self.driver.execute_script('return document.body.scrollHeight;')
+            if old_ht == new_ht:
+                break
+            old_ht = new_ht
+            
     
     def get_users_in_list(self):
         """
         Gets all the usernames of people in instagram following/ follower list and puts them in a list
+        Only works when the following/ follower list is open
         """
         username_list = []
         user_id_list = self.driver.find_elements_by_xpath('//*[@class = "FPmhX notranslate  _0imsa "]')
@@ -207,12 +221,12 @@ class InstagramBot:
         not_following_back = []
         self.nav_user(self.username)
         self.open_users_list('following')
-        self.scroll_down_list()
+        self.infinite_list_scroll()
         following = self.get_users_in_list()
         self.close_users_list()
         
         self.open_users_list('followers')
-        self.scroll_down_list()
+        self.infinite_list_scroll()
         followers = self.get_users_in_list()
         
         for user in following:
@@ -237,7 +251,8 @@ class InstagramBot:
     def unfollow_everyone(self):
         """
         Unfollows everyone that you're following
-        TODO: This takes too long. Unfollow them directly from your following list without getting their names
+        TODO: This is inefficient. Unfollow them directly from your following list without 
+        saving their names in a list or navigating to their page
         """
 
         following = self.get_users_in_list('following')
@@ -246,17 +261,38 @@ class InstagramBot:
             self.unfollow_user(user)
             
 
-    def get_follower_num(self, follow):
+    def get_follow_num(self, follow_type):
         """
-        Finds how many followers a user has
+        Finds how many followers a user has or the number of people a user is following
+        
+        Args:
+        follow_type:str: specifies if to get number of 'followers' or 'following'
         """
         
-        followers_box = self.driver.find_element_by_partial_link_text("followers")
-        follower_num = followers_box.text #.text gives the Name of the link text
-        print(follower_num)
-        return follower_num    
+        if follow_type == "followers" or follow_type == "following":
+            follow_box = self.driver.find_element_by_partial_link_text("{}".format(follow_type))
+            follow_num_statement = follow_box.text #.text gives the Name of the link text
+            follow_num = follow_num_statement.split(" ")[0]
+            print(follow_num)
+            return follow_num   
+        else:
+            print('Not a valid follow type. Must enter either "followers" or "following"')
+            follow_type = input('Enter a follow type: ')
+            self.get_follow_num(follow_type)            
         
+     
+    #def find_manually_followed(self):
+        #"""
+        #Finds users who were followed manually instead of through the bot and puts them in a list
+        #"""
+        #self.nav_user(self.username)
+        #self.open_users_list('following')
+        #following = self.get_users_in_list()
         
+          
+          
+          
+          
 my_bot = InstagramBot()
 my_bot.log_in()
 
@@ -270,11 +306,13 @@ my_bot.log_in()
 #my_bot.follow_multiple_users(3)
 
 my_bot.nav_user('art_gallery_666')
-num = my_bot.get_follower_num()
+my_bot.infinite_page_scroll()
+
+#num = my_bot.get_follow_num('fake')
 #print(num)
 
 #my_bot.open_users_list('followers')
-#my_bot.scroll_down_list()
+#my_bot.infinite_list_scroll()
 #time.sleep(60)
 
 
