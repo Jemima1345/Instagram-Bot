@@ -4,9 +4,7 @@ import os
 from configparser import ConfigParser
 
 
-##TODO: infinite_list_scroll gets caught. does not keep loading and scrolling
 ##TODO: fix get_follow_num error scenario 
-##TODO: infinite scroll down user's page
 ##TODO: store a user who is followed from their page in the has_fllwd list
 
 
@@ -28,7 +26,7 @@ class InstagramBot:
         self.user_url = config['IG_URLS']['user_url']
         #self.users_followers_url = config['IG_URLS']['users_followers_url']
         
-        self.driver = webdriver.Chrome('chromedriver')
+        self.driver = webdriver.Chrome('/home/jemima/WingProjects/InstagramBot/chromedriver')
         self.driver.get(self.login_url)
         time.sleep(2)
         
@@ -273,12 +271,13 @@ class InstagramBot:
             follow_box = self.driver.find_element_by_partial_link_text("{}".format(follow_type))
             follow_num_statement = follow_box.text #.text gives the Name of the link text
             follow_num = follow_num_statement.split(" ")[0]
-            print(follow_num)
+            #print(follow_num)
             return follow_num   
         else:
-            print('Not a valid follow type. Must enter either "followers" or "following"')
+            print('Cannot get follow num for that follow type. Must enter either "followers" or "following"')
             follow_type = input('Enter a follow type: ')
-            self.get_follow_num(follow_type)            
+            follow_num = self.get_follow_num(follow_type)  
+            return follow_num
         
      
     def find_manually_followed(self):
@@ -299,23 +298,24 @@ class InstagramBot:
 my_bot = InstagramBot()
 my_bot.log_in()
 
-#account = "guitarcenter"
-#my_bot.nav_user(my_account)
+#user = "guitarcenter"
+#my_bot.nav_user(user)
 #my_bot.open_users_list('followers')
 #my_bot.follow_multiple_users(3)
 
 #bad_people = my_bot.get_not_following_back()
-special_people = ['guitarcenter', 'billy.musgrave'] #people I don't want to unfollow
-special_accounts = my_bot.find_manually_followed()
-special_people.append(special_accounts)
+#special_people = ['guitarcenter', 'billy.musgrave'] #people I don't want to unfollow
+#special_accounts = my_bot.find_manually_followed()
+##prevents nested list
+#for account in special_accounts:
+    #special_people.append(account)
+#print(special_accounts)
+#print(special_people)
 #my_bot.unfollow_not_following_back(bad_people, special_people)
 
-print(special_accounts)
-print(special_people)
-
-#my_bot.nav_user('art_gallery_666')
-#num = my_bot.get_follow_num('fake')
-#print(num)
+my_bot.nav_user('guitarcenter')
+follower_num = my_bot.get_follow_num('followers')
+print(follower_num)
 
 #my_bot.infinite_page_scroll()
 #my_bot.open_users_list('followers')
