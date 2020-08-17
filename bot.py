@@ -4,7 +4,7 @@ import os
 from configparser import ConfigParser
 
 
-##TODO: fix get_follow_num error scenario 
+##TODO: sometimes it doesn't scroll all the way down a list of users
 ##TODO: store a user who is followed from their page in the has_fllwd list
 
 
@@ -29,6 +29,7 @@ class InstagramBot:
         self.driver = webdriver.Chrome('/home/jemima/WingProjects/InstagramBot/chromedriver')
         self.driver.get(self.login_url)
         time.sleep(2)
+        self.log_in()
         
     
     def log_in(self):
@@ -208,13 +209,13 @@ class InstagramBot:
         for user in user_id_list:
             username = user.get_attribute('title')
             username_list.append(username)
-        print (len(username_list), username_list)
+        print(f'Users in list: {len(username_list)} {username_list}')
         return username_list
         
     
     def get_not_following_back(self):
         """
-        Finds who is not following you back and puts them in a list
+        Navigates to your page, finds who is not following you back, and puts them in a list
         """
         not_following_back = []
         self.nav_user(self.username)
@@ -230,20 +231,40 @@ class InstagramBot:
         for user in following:
             if user not in followers:
                 not_following_back.append(user)
-        print(not_following_back)
+        print(f"Not following back: {not_following_back}")
         return not_following_back
     
     
-    def unfollow_not_following_back(self, not_following_back, do_not_unfollow):
+    def unfollow_not_following_back(self, do_not_unfollow = None):
         """
-        Unfollows everyone who is not following you back
-        """
-        for person in do_not_unfollow:
-            not_following_back.remove(person)
+        Unfollows everyone who is not following you back. Only unfollows 20 people at a time
+        to avoid getting banned on instagram
+        If they don't pass in people not to unfollow, it will unfollow everyone
         
-        for user in not_following_back:
-            self.nav_user(user)
-            self.unfollow_user()
+        Args:
+        do_not_unfollow:list: people the user does not want to unfollow. Default is none
+        """
+        
+        not_following_back = self.get_not_following_back()
+        for person in do_not_unfollow:
+            if person in not_following_back:
+                not_following_back.remove(person)
+        
+        #unfollow everyone at once
+        #for user in not_following_back:
+            #self.nav_user(user)
+            #self.unfollow_user()
+        
+        #unfollow max 20 people at once   
+        if len(not_following_back) <= 20: #change 1 to 20
+            for user in not_following_back:
+                self.nav_user(user)
+                self.unfollow_user()
+        else:
+            for counter, user in enumerate(not_following_back):
+                if counter < 20: #counter starts from 0
+                    self.nav_user(user)
+                    self.unfollow_user()
             
     
     def unfollow_everyone(self):
@@ -292,34 +313,6 @@ class InstagramBot:
         for user in following: 
             if user not in self.bot_fllwd:
                 manually_followed.append(user)
+        print(f'Manually followed: {manually_followed}') #not necessary
         return manually_followed
     
-          
-my_bot = InstagramBot()
-my_bot.log_in()
-
-#user = "guitarcenter"
-#my_bot.nav_user(user)
-#my_bot.open_users_list('followers')
-#my_bot.follow_multiple_users(3)
-
-#bad_people = my_bot.get_not_following_back()
-#special_people = ['guitarcenter', 'billy.musgrave'] #people I don't want to unfollow
-#special_accounts = my_bot.find_manually_followed()
-##prevents nested list
-#for account in special_accounts:
-    #special_people.append(account)
-#print(special_accounts)
-#print(special_people)
-#my_bot.unfollow_not_following_back(bad_people, special_people)
-
-my_bot.nav_user('guitarcenter')
-follower_num = my_bot.get_follow_num('followers')
-print(follower_num)
-
-#my_bot.infinite_page_scroll()
-#my_bot.open_users_list('followers')
-#my_bot.infinite_list_scroll()
-#time.sleep(60)
-
-#my_bot.save_has_fllwd_list()
