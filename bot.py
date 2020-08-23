@@ -12,6 +12,7 @@ class InstagramBot:
     def __init__(self):       
         """
         Creates an instance of the InstagramBot class. Reads in the list of people it has followed 
+        and logs into instagram
         """
         
         self.bot_fllwd = self.get_has_fllwd_list()
@@ -24,7 +25,6 @@ class InstagramBot:
         
         self.login_url = config['IG_URLS']['login_url']
         self.user_url = config['IG_URLS']['user_url']
-        #self.users_followers_url = config['IG_URLS']['users_followers_url']
         
         self.driver = webdriver.Chrome('/home/jemima/WingProjects/InstagramBot/chromedriver')
         self.driver.get(self.login_url)
@@ -168,7 +168,7 @@ class InstagramBot:
         #self.driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", scroll_box)
         #time.sleep(2)
         
-        SCROLL_PAUSE_TIME = 1
+        SCROLL_PAUSE_TIME = 2
         scroll_box = self.driver.find_element_by_xpath('/html/body/div[4]/div/div/div[2]')
         old_height = self.driver.execute_script('arguments[0].scrollTop', scroll_box) #top of list
         
@@ -199,6 +199,14 @@ class InstagramBot:
             old_ht = new_ht
             
     
+    def scroll_down(self):
+        """
+        Scrolls down slightly (not to the bottom of page)
+        """
+        self.driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+        time.sleep(1)
+        
+        
     def get_users_in_list(self):
         """
         Gets all the usernames of people in instagram following/ follower list and puts them in a list
@@ -237,8 +245,8 @@ class InstagramBot:
     
     def unfollow_not_following_back(self, do_not_unfollow = None):
         """
-        Unfollows everyone who is not following you back. Only unfollows 20 people at a time
-        to avoid getting banned on instagram
+        Unfollows everyone who is not following you back. Only unfollows 20 people on each
+        function call to avoid getting banned on instagram
         If they don't pass in people not to unfollow, it will unfollow everyone
         
         Args:
@@ -256,7 +264,7 @@ class InstagramBot:
             #self.unfollow_user()
         
         #unfollow max 20 people at once   
-        if len(not_following_back) <= 20: #change 1 to 20
+        if len(not_following_back) <= 20:
             for user in not_following_back:
                 self.nav_user(user)
                 self.unfollow_user()
@@ -316,3 +324,25 @@ class InstagramBot:
         print(f'Manually followed: {manually_followed}') #not necessary
         return manually_followed
     
+    
+    def like_posts_in_feed(self):
+        """
+        Likes 5 posts in my feed
+        """
+        liked_posts = 0
+        while liked_posts < 5:   
+            while True:
+                #scrolls down until it finds a post that has not been liked
+                like_btns = self.driver.find_elements_by_xpath('//*[@aria-label = "Like"][@height = "24"]')
+                if len(like_btns) > 0:
+                    print(f"{len(like_btns)} like buttons found")
+                    break
+                self.scroll_down()
+                     
+            for btn in like_btns:
+                if liked_posts == 5:
+                    break
+                btn.click()
+                liked_posts += 1            
+        time.sleep(1)
+        

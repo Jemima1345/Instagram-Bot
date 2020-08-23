@@ -12,4 +12,4 @@ for account in special_accounts:
 my_bot.unfollow_not_following_back(special_people)
 my_bot.save_has_fllwd_list() #not necessary
 
-print('Done unfollowing people') #for crontab log
+print('Done unfollowing people \n') #for crontab log

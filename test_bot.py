@@ -2,9 +2,24 @@ from bot import InstagramBot
 
 my_bot = InstagramBot()
 
-user = "guitarcenter"
-my_bot.nav_user(user)
-my_bot.get_users_in_list('followers')
+#my_bot.driver.get(my_bot.login_url) #goes to home page (following)
+#my_bot.scroll_down()
+my_bot.like_posts_in_feed()
+
+#user = "guitar.stuff239"
+#my_bot.nav_user(user)
+#my_bot.open_users_list('followers')
+#my_bot.get_users_in_list()
+#my_bot.open_users_list('following')
+#my_bot.get_users_in_list()
+
+#user = "fuzzinating"
+#my_bot.nav_user(user)
+#my_bot.open_users_list('followers')
+#my_bot.get_users_in_list()
+#my_bot.open_users_list('following')
+#my_bot.get_users_in_list()
+
 #my_bot.follow_multiple_users(3)
 
 #special_people = ['guitarcenter', 'billy.musgrave'] #people I don't want to unfollow
@@ -25,4 +40,4 @@ my_bot.get_users_in_list('followers')
 #my_bot.infinite_list_scroll()
 #time.sleep(60)
 
-#my_bot.save_has_fllwd_list()
+my_bot.save_has_fllwd_list()
