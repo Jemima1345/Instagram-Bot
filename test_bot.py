@@ -2,10 +2,6 @@ from bot import InstagramBot
 
 my_bot = InstagramBot()
 
-#my_bot.driver.get(my_bot.login_url) #goes to home page (following)
-#my_bot.scroll_down()
-my_bot.like_posts_in_feed()
-
 #user = "guitar.stuff239"
 #my_bot.nav_user(user)
 #my_bot.open_users_list('followers')
