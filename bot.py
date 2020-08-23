@@ -327,22 +327,30 @@ class InstagramBot:
     
     def like_posts_in_feed(self):
         """
-        Likes 5 posts in my feed
+        Either likes 50 posts in my feed or stops after scrolling 10 times
+        
+        Note: Only like up to 350 per hour to avoid getting banned on instagram 
         """
         liked_posts = 0
-        while liked_posts < 5:   
+        scroll_num = 1
+        while liked_posts < 50 and scroll_num < 10:   
             while True:
                 #scrolls down until it finds a post that has not been liked
                 like_btns = self.driver.find_elements_by_xpath('//*[@aria-label = "Like"][@height = "24"]')
+                #print(f"{len(like_btns)} like buttons found")
                 if len(like_btns) > 0:
-                    print(f"{len(like_btns)} like buttons found")
                     break
+                if scroll_num == 10:
+                    break                
                 self.scroll_down()
+                scroll_num += 1
                      
             for btn in like_btns:
-                if liked_posts == 5:
+                if liked_posts == 50:
                     break
                 btn.click()
-                liked_posts += 1            
+                liked_posts += 1   
+        print(f"Liked {liked_posts} posts")
+        print(f"Scroll num: {scroll_num}")
         time.sleep(1)
         
