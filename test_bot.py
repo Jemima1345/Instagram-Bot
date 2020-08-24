@@ -5,14 +5,14 @@ my_bot = InstagramBot()
 #my_bot.nav_user(user)
 #my_bot.open_post()
 
-user = "lmjoliette"
-my_bot.nav_user(user)
-my_bot.open_post()
-my_bot.like_all_comments()
+user = "maciejguitarist"
+#my_bot.nav_user(user)
+#my_bot.open_post()
+#my_bot.like_all_comments()
 
 #user = "brunamaacedoo"
-#my_bot.nav_user(user)
-#my_bot.like_comments_on_many_posts(1)
+my_bot.nav_user(user)
+my_bot.like_comments_on_many_posts()
 
 #user = "guitar.stuff239"
 #my_bot.nav_user(user)

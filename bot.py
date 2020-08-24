@@ -368,11 +368,9 @@ class InstagramBot:
     
     def like_all_comments(self):
         """
-        Likes all the comments on a post (infinitely) except comment replies
+        Likes all the comments on a post (infinitely) except comment replies.
+        Post must already be open
         """
-        #scroll_box = self.driver.find_element_by_xpath('/html/body/div[4]/div[2]/div/article/div[3]/div[1]')
-        #scroll_box = self.driver.find_element_by_class_name('EtaWk')
-        #old_ht = self.driver.execute_script('return arguments[0].scrollTop', scroll_box)
         breaker = True
         while breaker:
             like_btns = self.driver.find_elements_by_xpath('//*[@aria-label = "Like"][@height = "12"]')
@@ -394,10 +392,17 @@ class InstagramBot:
         self.open_post()
         for post in range(0, post_num):
             self.like_all_comments()
-            next_btn = self.driver.find_elements_by_xpath('//*[text() = "Next"]')
-            if len(next_btn) == 0:
-                break #if no next button is found, it has reached the end
-            for btn in next_btn:
-                #next_btn only contains one element
-                btn.click()
+            try:
+                next_btn = self.driver.find_element_by_xpath('//*[text() = "Next"]')
+                next_btn.click()
+            except NoSuchElementException:
+                break #if no next button is found, it has reached the last post
             time.sleep(1)
+            
+            #next_btn = self.driver.find_elements_by_xpath('//*[text() = "Next"]')
+            #if len(next_btn) == 0:
+                #break #if no next button is found, it has reached the end
+            #for btn in next_btn:
+                ##next_btn only contains one element
+                #btn.click()
+            #time.sleep(1)
