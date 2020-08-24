@@ -45,13 +45,13 @@ class InstagramBot:
         password_input.send_keys(self.password)
         login_btn = self.driver.find_element_by_xpath('//*[@id="loginForm"]/div/div[3]/button/div')
         login_btn.click()
-        time.sleep(3)
-        
-        not_now_btn1 = self.driver.find_element_by_xpath('//*[text() = "Not Now"]')
-        not_now_btn1.click()
         time.sleep(2)
+        
+        not_now_btn1 = self.find_button("Not Now")
+        not_now_btn1.click()
+        time.sleep(1)
         #must redefine btn to avoid error
-        not_now_btn2 = self.driver.find_element_by_xpath('//*[text() = "Not Now"]')
+        not_now_btn2 = self.find_button("Not Now")
         not_now_btn2.click()
         time.sleep(1)
         
@@ -328,23 +328,25 @@ class InstagramBot:
     
     def like_posts_in_feed(self):
         """
-        Either likes 50 posts in my feed or stops after scrolling 10 times
+        Either likes 50 posts in my feed or stops after scrolling 3 times
         
         Note: Only like up to 350 per hour to avoid getting banned on instagram 
         """
+        self.driver.get(self.login_url) #navigates to feed
         liked_posts = 0
         scroll_num = 1
-        while liked_posts < 50 and scroll_num < 10:   
+        while liked_posts < 50 and scroll_num < 3:   
             while True:
                 #scrolls down until it finds a post that has not been liked
                 like_btns = self.driver.find_elements_by_xpath('//*[@aria-label = "Like"][@height = "24"]')
                 #print(f"{len(like_btns)} like buttons found")
                 if len(like_btns) > 0:
                     break
-                if scroll_num == 10:
+                if scroll_num == 3:
                     break                
                 self.scroll_down()
                 scroll_num += 1
+                #print(scroll_num)
                      
             for btn in like_btns:
                 if liked_posts == 50:
@@ -368,7 +370,7 @@ class InstagramBot:
     
     def like_all_comments(self):
         """
-        Likes all the comments on a post (infinitely) except comment replies.
+        Likes all the comments on a single post except comment replies. Infinite.
         Post must already be open
         """
         breaker = True
@@ -385,10 +387,11 @@ class InstagramBot:
             time.sleep(1)        
             
             
-    def like_comments_on_many_posts(self, post_num = 10):
+    def like_comments_on_my_posts(self, post_num = 10):
         """
-        Likes comments on the first ten posts 
+        Likes comments on my most recent posts. 10 by default 
         """
+        self.nav_user(self.username)
         self.open_post()
         for post in range(0, post_num):
             self.like_all_comments()
@@ -398,11 +401,20 @@ class InstagramBot:
             except NoSuchElementException:
                 break #if no next button is found, it has reached the last post
             time.sleep(1)
-            
-            #next_btn = self.driver.find_elements_by_xpath('//*[text() = "Next"]')
-            #if len(next_btn) == 0:
-                #break #if no next button is found, it has reached the end
-            #for btn in next_btn:
-                ##next_btn only contains one element
-                #btn.click()
-            #time.sleep(1)
+    
+    
+    def watch_stories(self):
+        """
+        Watches stories from people I follow (on my home page)
+        """
+        self.driver.get(self.login_url)
+        story_btn = self.driver.find_element_by_class_name('OE3OK ')
+        story_btn.click()
+        time.sleep(1)
+        while True:
+            try:
+                next_btn = self.driver.find_element_by_class_name('ow3u_')
+                next_btn.click()
+                time.sleep(0.5)
+            except NoSuchElementException:
+                break
