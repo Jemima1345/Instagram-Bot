@@ -2,6 +2,7 @@ from selenium import webdriver
 import time
 import os
 from configparser import ConfigParser
+from selenium.common.exceptions import NoSuchElementException
 
 
 ##TODO: sometimes it doesn't scroll all the way down a list of users
@@ -353,4 +354,50 @@ class InstagramBot:
         print(f"Liked {liked_posts} posts")
         print(f"Scroll num: {scroll_num}")
         time.sleep(1)
+    
+    
+    def open_post(self):
+        """
+        Opens first post when page containing posts is already open
+        """
+        POST_LOADING_TIME = 5
+        post = self.driver.find_element_by_class_name("eLAPa")
+        post.click()
+        time.sleep(POST_LOADING_TIME)
         
+    
+    def like_all_comments(self):
+        """
+        Likes all the comments on a post (infinitely) except comment replies
+        """
+        #scroll_box = self.driver.find_element_by_xpath('/html/body/div[4]/div[2]/div/article/div[3]/div[1]')
+        #scroll_box = self.driver.find_element_by_class_name('EtaWk')
+        #old_ht = self.driver.execute_script('return arguments[0].scrollTop', scroll_box)
+        breaker = True
+        while breaker:
+            like_btns = self.driver.find_elements_by_xpath('//*[@aria-label = "Like"][@height = "12"]')
+            print(f"{len(like_btns)} like buttons found")
+            if len(like_btns) == 0:            
+                try:
+                    self.driver.find_element_by_xpath('//*[@aria-label = "Load more comments"]').click()
+                except NoSuchElementException:
+                    breaker = False #if there are no more comments to like, then stop
+            for btn in like_btns:
+                btn.click()
+            time.sleep(1)        
+            
+            
+    def like_comments_on_many_posts(self, post_num = 10):
+        """
+        Likes comments on the first ten posts 
+        """
+        self.open_post()
+        for post in range(0, post_num):
+            self.like_all_comments()
+            next_btn = self.driver.find_elements_by_xpath('//*[text() = "Next"]')
+            if len(next_btn) == 0:
+                break #if no next button is found, it has reached the end
+            for btn in next_btn:
+                #next_btn only contains one element
+                btn.click()
+            time.sleep(1)
