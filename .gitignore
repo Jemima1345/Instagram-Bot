@@ -3,3 +3,7 @@
 __pycache__/
 config.ini
 chromedriver
+
+following_people.log
+unfollowing_people.log
+general_interaction.log
