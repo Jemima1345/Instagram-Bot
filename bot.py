@@ -1,5 +1,6 @@
 from selenium import webdriver
 import time
+import datetime
 import os
 from configparser import ConfigParser
 from selenium.common.exceptions import NoSuchElementException
@@ -23,11 +24,14 @@ class InstagramBot:
         config.read(config_file)    
         self.username = config['IG_AUTH']['USERNAME']
         self.password = config['IG_AUTH']['PASSWORD']
-        
         self.login_url = config['IG_URLS']['login_url']
         self.user_url = config['IG_URLS']['user_url']
         
         self.driver = webdriver.Chrome('/home/jemima/WingProjects/InstagramBot/chromedriver')
+        now = datetime.datetime.now()
+        print("Current date and time : ")
+        print(now.strftime("%Y-%m-%d %H:%M:%S")) #for crontab log
+        
         self.driver.get(self.login_url)
         time.sleep(2)
         self.log_in()
